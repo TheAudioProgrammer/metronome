@@ -12,16 +12,22 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class Metronome
+class Metronome : public HighResolutionTimer
 {
 public:
+    // public methods
     void prepareToPlay (double sampleRate);
     void countSamples (int bufferSize);
     void reset();
-  
+    
+    //High Resolution Timer
+    void hiResTimerCallback() override;
   
 private:
     int mTotalSamples { 0 };
     double mSampleRate { 0 };
+    double mBpm { 60.0 };
+    int mUpdateInterval { 0 };
+    int mSamplesRemaining { 0 };
 };
 
