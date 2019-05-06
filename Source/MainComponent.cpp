@@ -57,18 +57,16 @@ void MainComponent::stop()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    metronome.prepareToPlay(sampleRate);
+    metronome.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
 {
     bufferToFill.clearActiveBufferRegion();
     
-    auto buffer = bufferToFill.numSamples;
-    
     if (playState == PlayState::Playing)
     {
-        metronome.countSamples (buffer);
+        metronome.getNextAudioBlock (bufferToFill);
     }
 }
 

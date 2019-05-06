@@ -15,9 +15,11 @@
 class Metronome : public HighResolutionTimer
 {
 public:
+    Metronome();
+    
     // public methods
-    void prepareToPlay (double sampleRate);
-    void countSamples (int bufferSize);
+    void prepareToPlay (int samplesPerBlock, double sampleRate);
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
     void reset();
     
     //High Resolution Timer
@@ -29,5 +31,8 @@ private:
     double mBpm { 60.0 };
     int mUpdateInterval { 0 };
     int mSamplesRemaining { 0 };
+    
+    AudioFormatManager mFormatManager;
+    std::unique_ptr <AudioFormatReaderSource> pMetronomeSample { nullptr };
 };
 
