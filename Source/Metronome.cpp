@@ -22,48 +22,56 @@ Metronome::Metronome()
     auto formatReader = mFormatManager.createReaderFor(mySamples[0]);
     
     pMetronomeSample.reset( new AudioFormatReaderSource (formatReader, true));
+    
+    mUpdateInterval = 60.0 / mBpm * mSampleRate;
+    
+    pMetronomeSample->setNextReadPosition(0);
 }
 
 void Metronome::prepareToPlay (int samplesPerBlock, double sampleRate)
 {
     mSampleRate = sampleRate;
     mUpdateInterval = 60.0 / mBpm * mSampleRate;
-    HighResolutionTimer::startTimer(mUpdateInterval);
     
     if (pMetronomeSample != nullptr)
     {
         pMetronomeSample->prepareToPlay(samplesPerBlock, sampleRate);
         DBG("file loaded");
     }
+    
+    pMetronomeSample->setNextReadPosition(0);
 }
 
 void Metronome::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
 {
-    auto bufferSize = bufferToFill.numSamples;
+    const auto bufferSize = bufferToFill.numSamples;
     
     mTotalSamples+=bufferSize;
     
     mSamplesRemaining = mTotalSamples % mUpdateInterval;
     
-    DBG("Samples Remaining: " << mSamplesRemaining);
-    DBG("Update Interval: " << mUpdateInterval);
-    
     if ((mSamplesRemaining + bufferSize) >= mUpdateInterval)
     {
-        DBG("CLICK");
-        DBG("Total Samples: " << mTotalSamples);
+        const auto timeToStartPlaying = mUpdateInterval - mSamplesRemaining;
+        pMetronomeSample->setNextReadPosition(0);
+        
+        for (auto sample = 0; sample < bufferSize; sample++)
+        {
+            if (sample == timeToStartPlaying)
+            {
+                pMetronomeSample->getNextAudioBlock (bufferToFill);
+            }
+        }
     }
     
-    //pMetronomeSample->getNextAudioBlock(const AudioSourceChannelInfo& bufferToFill);
+    if (pMetronomeSample->getNextReadPosition() != 0)
+    {
+        pMetronomeSample->getNextAudioBlock (bufferToFill);
+    }
 }
 
 void Metronome::reset()
 {
-    HighResolutionTimer::stopTimer();
     mTotalSamples = 0;
-}
-
-void Metronome::hiResTimerCallback()
-{
-    mUpdateInterval = 60.0 / mBpm * mSampleRate;
+    pMetronomeSample->setNextReadPosition(0);
 }

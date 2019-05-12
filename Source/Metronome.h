@@ -12,7 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class Metronome : public HighResolutionTimer
+class Metronome
 {
 public:
     Metronome();
@@ -22,13 +22,10 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
     void reset();
     
-    //High Resolution Timer
-    void hiResTimerCallback() override;
-  
 private:
     int mTotalSamples { 0 };
     double mSampleRate { 0 };
-    double mBpm { 60.0 };
+    double mBpm { 132.0 };
     int mUpdateInterval { 0 };
     int mSamplesRemaining { 0 };
     
